@@ -1,0 +1,1865 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlowStory</title>
+    <style>
+        :root {
+            --lilac: #e6e6fa;
+            --orange-pastel: #ffd8b1;
+            --yellow-pastel: #fffacd;
+            --pink-pastel: #ffd1dc;
+            --mint: #b5e7a0;
+            --light-gray: #f5f5f5;
+            --dark-gray: #333;
+            --purple: #8a2be2;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Menu Principal */
+        .main-menu {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: white;
+            padding: 10px 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            height: 60px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--purple);
+            cursor: pointer;
+        }
+
+        .menu-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .menu-btn {
+            padding: 8px 15px;
+            border: none;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .menu-btn:hover {
+            background-color: #e0e0e0;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Área de Trabalho */
+        .workspace {
+            display: flex;
+            height: calc(100vh - 60px);
+        }
+
+        /* Painel de Abas */
+        .tab-panel {
+            width: 200px;
+            background-color: white;
+            padding: 10px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            overflow-y: auto;
+        }
+
+        .tab-category {
+            margin-bottom: 20px;
+        }
+
+        .tab-category h3 {
+            font-size: 14px;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .tab-item {
+            padding: 8px 10px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background-color 0.2s;
+        }
+
+        .tab-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .esqueleto { background-color: var(--lilac); }
+        .aparencia { background-color: var(--orange-pastel); }
+        .bolhas-filhas { background-color: var(--orange-pastel); }
+        .cenas-esqueleto { background-color: var(--yellow-pastel); }
+        .cenas { background-color: var(--pink-pastel); }
+        .menu-bolhas { background-color: var(--mint); }
+
+        /* Mesa de Trabalho */
+        .work-table {
+            flex: 1;
+            background-color: #f9f9f9;
+            position: relative;
+            overflow: auto;
+            padding: 20px;
+        }
+
+        .bubble {
+            position: absolute;
+            min-width: 150px;
+            min-height: 80px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 10px;
+            cursor: move;
+            user-select: none;
+            z-index: 10;
+        }
+
+        .bubble-header {
+            font-weight: bold;
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .bubble-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .bubble-action {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .bubble-content {
+            font-size: 12px;
+        }
+
+        .bubble-image {
+            max-width: 100%;
+            max-height: 150px;
+            display: block;
+            margin: 5px auto;
+            border-radius: 5px;
+        }
+
+        .connection-point {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--purple);
+            position: absolute;
+            cursor: crosshair;
+        }
+
+        .connection-point.top {
+            top: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .connection-point.bottom {
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .connection-point.left {
+            left: -5px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .connection-point.right {
+            right: -5px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .connection-line {
+            position: absolute;
+            background-color: var(--purple);
+            height: 2px;
+            transform-origin: 0 0;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        /* Editor de Texto */
+        .text-editor {
+            width: 400px;
+            background-color: white;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-header {
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .editor-area {
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            font-family: monospace;
+            resize: none;
+            outline: none;
+        }
+
+        .editor-actions {
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .action-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .save-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .clear-btn {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .upload-btn {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        /* Modal de Login */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 400px;
+            max-width: 90%;
+        }
+
+        .modal-header {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        /* Sistema de Upload */
+        .upload-system {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            z-index: 900;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .upload-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .upload-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+        }
+
+        .upload-sidebar {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .upload-main {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        .upload-area:hover {
+            border-color: var(--purple);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--purple);
+            background-color: #f0f0ff;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: #ccc;
+            margin-bottom: 10px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .uploaded-files {
+            margin-top: 20px;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background-color: white;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .file-preview {
+            width: 50px;
+            height: 50px;
+            border-radius: 5px;
+            margin-right: 15px;
+            object-fit: cover;
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .file-size {
+            color: #666;
+            font-size: 12px;
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .rename-input {
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            width: 100%;
+        }
+
+        /* Sistema de Perfis */
+        .profile-system {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            z-index: 900;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .profile-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+        }
+
+        .profile-sidebar {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .profile-main {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        /* FlowSocial */
+        .flowsocial {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            z-index: 900;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .flowsocial-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .flowsocial-content {
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            gap: 20px;
+        }
+
+        .flowsocial-sidebar {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .flowsocial-main {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .social-post {
+            background-color: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .post-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #ddd;
+            margin-right: 10px;
+        }
+
+        .post-author {
+            font-weight: bold;
+        }
+
+        .post-content {
+            margin-bottom: 10px;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .post-action {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #666;
+        }
+
+        /* Preview */
+        .preview {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            z-index: 900;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .preview-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .preview-scene {
+            width: 80%;
+            height: 400px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .preview-character {
+            width: 100px;
+            height: 200px;
+            background-color: #ddd;
+            border-radius: 10px;
+        }
+
+        .preview-dialog {
+            width: 80%;
+            padding: 15px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Configurações */
+        .settings {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            z-index: 900;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .settings-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+        }
+
+        .settings-sidebar {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .settings-main {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .setting-group {
+            margin-bottom: 20px;
+        }
+
+        .setting-group h3 {
+            margin-bottom: 10px;
+        }
+
+        .setting-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: white;
+            border-radius: 5px;
+        }
+
+        /* Pesquisa de Bolhas */
+        .search-bubbles {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            z-index: 900;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .search-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .search-content {
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            gap: 20px;
+        }
+
+        .search-sidebar {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .search-main {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .search-results {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .search-result {
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            cursor: pointer;
+        }
+
+        /* Nova História */
+        .new-story {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            z-index: 900;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .new-story-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .new-story-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .story-option {
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            transition: background-color 0.3s;
+        }
+
+        .story-option:hover {
+            background-color: #e9e9e9;
+        }
+
+        /* Convite */
+        .invite {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            z-index: 900;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .invite-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .invite-content {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        /* Aviso de Atalho */
+        .shortcut-hint {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--purple);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 14px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .shortcut-hint.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Aviso de Atalho -->
+    <div class="shortcut-hint" id="shortcut-hint">Enter: SaveRote</div>
+
+    <!-- Menu Principal -->
+    <div class="main-menu">
+        <div class="logo" id="logo">FlowStory</div>
+        <div class="menu-buttons">
+            <button class="menu-btn" id="new-story-btn">Nova História Interativa</button>
+            <button class="menu-btn" id="new-webseries">Nova Websérie</button>
+            <button class="menu-btn" id="settings-btn">Configuração</button>
+            <button class="menu-btn" id="login-btn">Login</button>
+            <button class="menu-btn" id="invite-btn">Convite-se</button>
+            <button class="menu-btn" id="search-bubbles-btn">Pesquisar Bolhas</button>
+            <button class="menu-btn" id="preview-btn">Preview</button>
+            <button class="menu-btn upload-btn" id="upload-btn">Upload</button>
+        </div>
+        <div class="user-actions">
+            <button class="menu-btn" id="save-point">SavePoint</button>
+            <button class="menu-btn" id="save-rote">SaveRote</button>
+            <button class="menu-btn" id="save-scene">SaveScene</button>
+        </div>
+    </div>
+
+    <!-- Área de Trabalho -->
+    <div class="workspace">
+        <!-- Painel de Abas -->
+        <div class="tab-panel">
+            <div class="tab-category">
+                <h3>Esqueleto da História</h3>
+                <div class="tab-item esqueleto" data-type="se">Se</div>
+                <div class="tab-item esqueleto" data-type="contexto">Contexto</div>
+                <div class="tab-item esqueleto" data-type="entao">Então</div>
+                <div class="tab-item esqueleto" data-type="senao">Senão</div>
+            </div>
+            
+            <div class="tab-category">
+                <h3>Aparência</h3>
+                <div class="tab-item aparencia" data-type="mover-personagem">Mover Personagem</div>
+                <div class="tab-item aparencia" data-type="mudar-foco">Mudar Foco</div>
+                <div class="tab-item aparencia" data-type="cenario">Cenário</div>
+                <div class="tab-item aparencia" data-type="esconder-personagem">Esconder Personagem</div>
+                <div class="tab-item aparencia" data-type="sair-tela">Sair da Tela</div>
+                <div class="tab-item aparencia" data-type="desaparecer">Desaparecer</div>
+            </div>
+            
+            <div class="tab-category">
+                <h3>Bolhas Filhas</h3>
+                <div class="tab-item bolhas-filhas" data-type="personagem">Personagem()</div>
+                <div class="tab-item bolhas-filhas" data-type="cenario">Cenário()</div>
+                <div class="tab-item bolhas-filhas" data-type="mudar-expressao">Mudar Expressão</div>
+                <div class="tab-item bolhas-filhas" data-type="trazer-personagem">Trazer Personagem</div>
+                <div class="tab-item bolhas-filhas" data-type="esquerda">Esquerda</div>
+                <div class="tab-item bolhas-filhas" data-type="direita">Direita</div>
+                <div class="tab-item bolhas-filhas" data-type="centro">Centro</div>
+                <div class="tab-item bolhas-filhas" data-type="canto-sup-dir">Canto Sup. Dir</div>
+                <div class="tab-item bolhas-filhas" data-type="canto-sup-esq">Canto Sup. Esq</div>
+                <div class="tab-item bolhas-filhas" data-type="canto-inf-dir">Canto Inf. Dir</div>
+                <div class="tab-item bolhas-filhas" data-type="canto-inf-esq">Canto Inf. Esq</div>
+            </div>
+            
+            <div class="tab-category">
+                <h3>Cenas Esqueleto</h3>
+                <div class="tab-item cenas-esqueleto" data-type="novo-capitulo">Novo Capítulo</div>
+                <div class="tab-item cenas-esqueleto" data-type="criar-rota">Criar Rota</div>
+                <div class="tab-item cenas-esqueleto" data-type="dialogo">Diálogo</div>
+            </div>
+            
+            <div class="tab-category">
+                <h3>Cenas</h3>
+                <div class="tab-item cenas" data-type="tempo-slide">Tempo de Slide</div>
+                <div class="tab-item cenas" data-type="transicao-subita">Transição Súbita</div>
+                <div class="tab-item cenas" data-type="mudar-expressao">Mudar Expressão</div>
+                <div class="tab-item cenas" data-type="cena">Cena</div>
+            </div>
+            
+            <div class="tab-category">
+                <h3>Fim</h3>
+                <div class="tab-item" data-type="parar-tudo">Parar Tudo</div>
+            </div>
+            
+            <div class="tab-category">
+                <h3>Menu Bolhas</h3>
+                <div class="tab-item menu-bolhas" data-type="onde-parei">Onde Parei</div>
+                <div class="tab-item menu-bolhas" data-type="savepoint">SavePoint</div>
+                <div class="tab-item menu-bolhas" data-type="newpoint">NewPoint</div>
+                <div class="tab-item menu-bolhas" data-type="settar">Settar</div>
+            </div>
+        </div>
+
+        <!-- Mesa de Trabalho -->
+        <div class="work-table" id="work-table">
+            <!-- Bolhas serão adicionadas aqui dinamicamente -->
+        </div>
+
+        <!-- Editor de Texto -->
+        <div class="text-editor">
+            <div class="editor-header">Editor de Texto de Bolhas</div>
+            <textarea class="editor-area" id="editor-area" placeholder="Escreva o código da bolha aqui..."></textarea>
+            <div class="editor-actions">
+                <button class="action-btn clear-btn" id="clear-editor">Limpar</button>
+                <button class="action-btn save-btn" id="save-editor">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sistema de Upload -->
+    <div class="upload-system" id="upload-system">
+        <div class="upload-header">
+            <h2>Sistema de Upload</h2>
+            <button class="close-btn" id="close-upload">×</button>
+        </div>
+        <div class="upload-content">
+            <div class="upload-sidebar">
+                <h3>Opções</h3>
+                <div class="tab-item" id="upload-images">Imagens</div>
+                <div class="tab-item" id="upload-audio">Áudio</div>
+                <div class="tab-item" id="upload-templates">Templates</div>
+            </div>
+            <div class="upload-main">
+                <h3>Upload de Imagens</h3>
+                <p>Formatos aceitos: PNG, JPG, JPEG</p>
+                
+                <div class="upload-area" id="upload-area">
+                    <div class="upload-icon">📁</div>
+                    <p>Arraste e solte arquivos aqui ou clique para selecionar</p>
+                    <input type="file" id="file-input" class="file-input" multiple accept=".png,.jpg,.jpeg">
+                </div>
+                
+                <div class="uploaded-files" id="uploaded-files">
+                    <h4>Arquivos Carregados</h4>
+                    <!-- Arquivos serão listados aqui -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Login -->
+    <div class="modal" id="login-modal">
+        <div class="modal-content">
+            <div class="modal-header">Login</div>
+            <div class="form-group">
+                <label for="username">Nick ou Email:</label>
+                <input type="text" id="username">
+            </div>
+            <div class="form-group">
+                <label for="password">Senha ou Código:</label>
+                <input type="password" id="password">
+            </div>
+            <div class="modal-actions">
+                <button class="action-btn" id="cancel-login">Cancelar</button>
+                <button class="action-btn save-btn" id="confirm-login">Entrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sistema de Perfis -->
+    <div class="profile-system" id="profile-system">
+        <div class="profile-header">
+            <h2>Minha Banca</h2>
+            <button class="close-btn" id="close-profile">×</button>
+        </div>
+        <div class="profile-content">
+            <div class="profile-sidebar">
+                <h3>Menu</h3>
+                <div class="tab-item" id="profile-stories">Suas Histórias</div>
+                <div class="tab-item" id="profile-chat">Bate Papo</div>
+                <div class="tab-item" id="profile-updates">Atualizações</div>
+                <div class="tab-item" id="profile-explore">Explorar Bancas</div>
+            </div>
+            <div class="profile-main">
+                <h3 id="profile-main-title">Suas Histórias</h3>
+                <div id="profile-main-content">
+                    <p>Área para exibir o conteúdo selecionado no menu lateral.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FlowSocial -->
+    <div class="flowsocial" id="flowsocial">
+        <div class="flowsocial-header">
+            <h2>FlowSocial</h2>
+            <button class="close-btn" id="close-flowsocial">×</button>
+        </div>
+        <div class="flowsocial-content">
+            <div class="flowsocial-sidebar">
+                <h3>Menu</h3>
+                <div class="tab-item" id="social-feed">Feed</div>
+                <div class="tab-item" id="social-groups">Grupos</div>
+                <div class="tab-item" id="social-jams">Jams</div>
+                <div class="tab-item" id="social-wikis">Wikis</div>
+                <div class="tab-item" id="social-cafe">Café Literário</div>
+            </div>
+            <div class="flowsocial-main">
+                <h3 id="social-main-title">Feed</h3>
+                <div id="social-main-content">
+                    <div class="social-post">
+                        <div class="post-header">
+                            <div class="post-avatar"></div>
+                            <div class="post-author">CriativaFlow</div>
+                        </div>
+                        <div class="post-content">
+                            Acabei de publicar minha nova história interativa! Venham conferir!
+                        </div>
+                        <div class="post-actions">
+                            <button class="post-action">Curtir</button>
+                            <button class="post-action">Comentar</button>
+                            <button class="post-action">Compartilhar</button>
+                        </div>
+                    </div>
+                    <div class="social-post">
+                        <div class="post-header">
+                            <div class="post-avatar"></div>
+                            <div class="post-author">StoryMaker</div>
+                        </div>
+                        <div class="post-content">
+                            Estou participando da Jam de Outono! Quem mais vai participar?
+                        </div>
+                        <div class="post-actions">
+                            <button class="post-action">Curtir</button>
+                            <button class="post-action">Comentar</button>
+                            <button class="post-action">Compartilhar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview -->
+    <div class="preview" id="preview">
+        <div class="preview-header">
+            <h2>Preview</h2>
+            <button class="close-btn" id="close-preview">×</button>
+        </div>
+        <div class="preview-content">
+            <div class="preview-scene">
+                <div class="preview-character"></div>
+            </div>
+            <div class="preview-dialog">
+                <p>Esta é uma prévia da sua história. Aqui você pode testar como ficará o jogo.</p>
+            </div>
+            <button class="action-btn">Próxima Cena</button>
+        </div>
+    </div>
+
+    <!-- Configurações -->
+    <div class="settings" id="settings">
+        <div class="settings-header">
+            <h2>Configurações</h2>
+            <button class="close-btn" id="close-settings">×</button>
+        </div>
+        <div class="settings-content">
+            <div class="settings-sidebar">
+                <h3>Opções</h3>
+                <div class="tab-item" id="settings-general">Geral</div>
+                <div class="tab-item" id="settings-export">Exportação</div>
+                <div class="tab-item" id="settings-account">Conta</div>
+            </div>
+            <div class="settings-main">
+                <h3 id="settings-main-title">Configurações Gerais</h3>
+                <div id="settings-main-content">
+                    <div class="setting-group">
+                        <h3>Salvamento Automático</h3>
+                        <div class="setting-option">
+                            <span>Intervalo de salvamento automático</span>
+                            <select>
+                                <option>15 segundos</option>
+                                <option>30 segundos</option>
+                                <option>1 minuto</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="setting-group">
+                        <h3>Interface</h3>
+                        <div class="setting-option">
+                            <span>Tema</span>
+                            <select>
+                                <option>Claro</option>
+                                <option>Escuro</option>
+                                <option>Automático</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pesquisa de Bolhas -->
+    <div class="search-bubbles" id="search-bubbles">
+        <div class="search-header">
+            <h2>Pesquisar Bolhas</h2>
+            <button class="close-btn" id="close-search">×</button>
+        </div>
+        <div class="search-content">
+            <div class="search-sidebar">
+                <h3>Filtros</h3>
+                <div class="form-group">
+                    <label for="search-type">Tipo:</label>
+                    <select id="search-type">
+                        <option>Todos</option>
+                        <option>Esqueleto</option>
+                        <option>Aparência</option>
+                        <option>Bolhas Filhas</option>
+                    </select>
+                </div>
+            </div>
+            <div class="search-main">
+                <div class="form-group">
+                    <input type="text" placeholder="Digite para pesquisar...">
+                </div>
+                <div class="search-results">
+                    <div class="search-result">
+                        <div class="bubble-header">Se</div>
+                        <div class="bubble-content">Condicional para verificar uma condição</div>
+                    </div>
+                    <div class="search-result">
+                        <div class="bubble-header">Personagem()</div>
+                        <div class="bubble-content">Define um personagem na cena</div>
+                    </div>
+                    <div class="search-result">
+                        <div class="bubble-header">Cenário</div>
+                        <div class="bubble-content">Altera o cenário da cena</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nova História -->
+    <div class="new-story" id="new-story">
+        <div class="new-story-header">
+            <h2>Nova História Interativa</h2>
+            <button class="close-btn" id="close-new-story">×</button>
+        </div>
+        <div class="new-story-content">
+            <div class="story-option" id="blank-story">
+                <h3>História em Branco</h3>
+                <p>Comece do zero com uma história vazia</p>
+            </div>
+            <div class="story-option" id="template-story">
+                <h3>Usar Template</h3>
+                <p>Comece com um template pré-definido</p>
+            </div>
+            <div class="story-option" id="import-story">
+                <h3>Importar História</h3>
+                <p>Importe uma história existente</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Convite -->
+    <div class="invite" id="invite">
+        <div class="invite-header">
+            <h2>Convite-se</h2>
+            <button class="close-btn" id="close-invite">×</button>
+        </div>
+        <div class="invite-content">
+            <div class="form-group">
+                <label for="invite-nick">Nick desejado:</label>
+                <input type="text" id="invite-nick">
+            </div>
+            <div class="form-group">
+                <label for="invite-password">Senha:</label>
+                <input type="password" id="invite-password">
+            </div>
+            <div class="form-group">
+                <label for="invite-email">Email:</label>
+                <input type="email" id="invite-email">
+            </div>
+            <div class="modal-actions">
+                <button class="action-btn" id="cancel-invite">Cancelar</button>
+                <button class="action-btn save-btn" id="confirm-invite">Enviar Convite</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variáveis globais
+        let bubbles = [];
+        let selectedBubble = null;
+        let isDragging = false;
+        let dragOffset = { x: 0, y: 0 };
+        let isConnecting = false;
+        let connectionStart = null;
+        let uploadedFiles = [];
+
+        // Elementos DOM
+        const workTable = document.getElementById('work-table');
+        const editorArea = document.getElementById('editor-area');
+        const loginModal = document.getElementById('login-modal');
+        const profileSystem = document.getElementById('profile-system');
+        const flowsocial = document.getElementById('flowsocial');
+        const preview = document.getElementById('preview');
+        const settings = document.getElementById('settings');
+        const searchBubbles = document.getElementById('search-bubbles');
+        const newStory = document.getElementById('new-story');
+        const invite = document.getElementById('invite');
+        const uploadSystem = document.getElementById('upload-system');
+        const shortcutHint = document.getElementById('shortcut-hint');
+        const fileInput = document.getElementById('file-input');
+        const uploadArea = document.getElementById('upload-area');
+        const uploadedFilesContainer = document.getElementById('uploaded-files');
+
+        // Event Listeners para abas
+        document.querySelectorAll('.tab-item').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const type = tab.getAttribute('data-type');
+                const title = tab.textContent;
+                createBubble(type, title);
+            });
+        });
+
+        // Event Listeners para botões do menu
+        document.getElementById('login-btn').addEventListener('click', () => {
+            loginModal.style.display = 'flex';
+        });
+
+        document.getElementById('cancel-login').addEventListener('click', () => {
+            loginModal.style.display = 'none';
+        });
+
+        document.getElementById('confirm-login').addEventListener('click', () => {
+            // Simulação de login bem-sucedido
+            loginModal.style.display = 'none';
+            profileSystem.style.display = 'block';
+        });
+
+        document.getElementById('close-profile').addEventListener('click', () => {
+            profileSystem.style.display = 'none';
+        });
+
+        // FlowSocial
+        document.getElementById('logo').addEventListener('click', () => {
+            flowsocial.style.display = 'block';
+        });
+
+        document.getElementById('close-flowsocial').addEventListener('click', () => {
+            flowsocial.style.display = 'none';
+        });
+
+        // Preview
+        document.getElementById('preview-btn').addEventListener('click', () => {
+            preview.style.display = 'block';
+        });
+
+        document.getElementById('close-preview').addEventListener('click', () => {
+            preview.style.display = 'none';
+        });
+
+        // Configurações
+        document.getElementById('settings-btn').addEventListener('click', () => {
+            settings.style.display = 'block';
+        });
+
+        document.getElementById('close-settings').addEventListener('click', () => {
+            settings.style.display = 'none';
+        });
+
+        // Pesquisa de Bolhas
+        document.getElementById('search-bubbles-btn').addEventListener('click', () => {
+            searchBubbles.style.display = 'block';
+        });
+
+        document.getElementById('close-search').addEventListener('click', () => {
+            searchBubbles.style.display = 'none';
+        });
+
+        // Nova História
+        document.getElementById('new-story-btn').addEventListener('click', () => {
+            newStory.style.display = 'block';
+        });
+
+        document.getElementById('close-new-story').addEventListener('click', () => {
+            newStory.style.display = 'none';
+        });
+
+        document.getElementById('blank-story').addEventListener('click', () => {
+            // Limpar a mesa de trabalho
+            workTable.innerHTML = '';
+            bubbles = [];
+            selectedBubble = null;
+            editorArea.value = '';
+            newStory.style.display = 'none';
+            alert('Nova história em branco criada!');
+        });
+
+        // Convite
+        document.getElementById('invite-btn').addEventListener('click', () => {
+            invite.style.display = 'block';
+        });
+
+        document.getElementById('close-invite').addEventListener('click', () => {
+            invite.style.display = 'none';
+        });
+
+        document.getElementById('cancel-invite').addEventListener('click', () => {
+            invite.style.display = 'none';
+        });
+
+        document.getElementById('confirm-invite').addEventListener('click', () => {
+            const nick = document.getElementById('invite-nick').value;
+            if (nick) {
+                invite.style.display = 'none';
+                alert(`Convite enviado para ${nick}! Verifique seu email.`);
+            } else {
+                alert('Por favor, insira um nick!');
+            }
+        });
+
+        // Sistema de Upload
+        document.getElementById('upload-btn').addEventListener('click', () => {
+            uploadSystem.style.display = 'block';
+        });
+
+        document.getElementById('close-upload').addEventListener('click', () => {
+            uploadSystem.style.display = 'none';
+        });
+
+        // Eventos para upload de arquivos
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            handleFiles(files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        // Função para lidar com arquivos carregados
+        function handleFiles(files) {
+            for (let file of files) {
+                // Verificar se é uma imagem
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        const fileData = {
+                            id: Date.now() + Math.random(),
+                            name: file.name,
+                            size: formatFileSize(file.size),
+                            data: e.target.result,
+                            type: file.type
+                        };
+                        
+                        uploadedFiles.push(fileData);
+                        displayUploadedFiles();
+                    };
+                    
+                    reader.readAsDataURL(file);
+                } else {
+                    alert(`Formato não suportado: ${file.name}. Apenas PNG, JPG e JPEG são aceitos.`);
+                }
+            }
+        }
+
+        // Função para formatar tamanho do arquivo
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Função para exibir arquivos carregados
+        function displayUploadedFiles() {
+            uploadedFilesContainer.innerHTML = '<h4>Arquivos Carregados</h4>';
+            
+            if (uploadedFiles.length === 0) {
+                uploadedFilesContainer.innerHTML += '<p>Nenhum arquivo carregado</p>';
+                return;
+            }
+            
+            uploadedFiles.forEach(file => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <img src="${file.data}" class="file-preview" alt="${file.name}">
+                    <div class="file-info">
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-size">${file.size}</div>
+                    </div>
+                    <div class="file-actions">
+                        <button class="action-btn" onclick="renameFile('${file.id}')">Renomear</button>
+                        <button class="action-btn" onclick="useFile('${file.id}')">Usar</button>
+                        <button class="action-btn clear-btn" onclick="deleteFile('${file.id}')">Excluir</button>
+                    </div>
+                `;
+                uploadedFilesContainer.appendChild(fileItem);
+            });
+        }
+
+        // Função para renomear arquivo
+        function renameFile(fileId) {
+            const file = uploadedFiles.find(f => f.id == fileId);
+            if (!file) return;
+            
+            const newName = prompt('Digite o novo nome do arquivo:', file.name);
+            if (newName && newName.trim() !== '') {
+                file.name = newName.trim();
+                displayUploadedFiles();
+                alert('Arquivo renomeado com sucesso!');
+            }
+        }
+
+        // Função para usar arquivo em uma bolha
+        function useFile(fileId) {
+            const file = uploadedFiles.find(f => f.id == fileId);
+            if (!file) return;
+            
+            // Criar uma bolha especial para a imagem
+            const bubble = createBubble('imagem', `Imagem: ${file.name}`);
+            bubble.querySelector('.bubble-content').innerHTML = `<img src="${file.data}" class="bubble-image" alt="${file.name}">`;
+            
+            uploadSystem.style.display = 'none';
+            alert('Imagem adicionada à mesa de trabalho!');
+        }
+
+        // Função para excluir arquivo
+        function deleteFile(fileId) {
+            if (confirm('Tem certeza que deseja excluir este arquivo?')) {
+                uploadedFiles = uploadedFiles.filter(f => f.id != fileId);
+                displayUploadedFiles();
+            }
+        }
+
+        // Tornar funções globais para uso nos event listeners
+        window.renameFile = renameFile;
+        window.useFile = useFile;
+        window.deleteFile = deleteFile;
+
+        // Salvamento
+        document.getElementById('save-point').addEventListener('click', () => {
+            alert('SavePoint realizado com sucesso!');
+        });
+
+        document.getElementById('save-rote').addEventListener('click', () => {
+            showSaveRoteOptions();
+        });
+
+        document.getElementById('save-scene').addEventListener('click', () => {
+            alert('SaveScene realizado com sucesso!');
+        });
+
+        document.getElementById('clear-editor').addEventListener('click', () => {
+            editorArea.value = '';
+        });
+
+        document.getElementById('save-editor').addEventListener('click', () => {
+            if (selectedBubble) {
+                selectedBubble.querySelector('.bubble-content').textContent = editorArea.value;
+                alert('Conteúdo da bolha salvo!');
+            } else {
+                alert('Selecione uma bolha para editar!');
+            }
+        });
+
+        // Função para mostrar opções de SaveRote
+        function showSaveRoteOptions() {
+            alert('Opções de exportação:\n- HTML com CSS, JavaScript, JSON\n- APK\n- EXE\n- GitHub\n- Itch.io');
+        }
+
+        // Função para criar bolhas
+        function createBubble(type, title) {
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            bubble.setAttribute('data-type', type);
+            
+            // Posição aleatória na mesa de trabalho
+            const x = Math.floor(Math.random() * (workTable.offsetWidth - 200));
+            const y = Math.floor(Math.random() * (workTable.offsetHeight - 100));
+            
+            bubble.style.left = `${x}px`;
+            bubble.style.top = `${y}px`;
+            
+            bubble.innerHTML = `
+                <div class="bubble-header">
+                    <span>${title}</span>
+                    <div class="bubble-actions">
+                        <button class="bubble-action" title="Conectar">🔗</button>
+                        <button class="bubble-action" title="Duplicar">⎘</button>
+                        <button class="bubble-action" title="Excluir">✕</button>
+                    </div>
+                </div>
+                <div class="bubble-content">Conteúdo da bolha ${title}</div>
+                <div class="connection-point top"></div>
+                <div class="connection-point bottom"></div>
+                <div class="connection-point left"></div>
+                <div class="connection-point right"></div>
+            `;
+            
+            // Adicionar eventos
+            bubble.addEventListener('mousedown', startDrag);
+            bubble.addEventListener('click', selectBubble);
+            
+            // Eventos para os botões da bolha
+            const buttons = bubble.querySelectorAll('.bubble-action');
+            buttons[0].addEventListener('click', (e) => {
+                e.stopPropagation();
+                startConnection(bubble);
+            });
+            
+            buttons[1].addEventListener('click', (e) => {
+                e.stopPropagation();
+                duplicateBubble(bubble);
+            });
+            
+            buttons[2].addEventListener('click', (e) => {
+                e.stopPropagation();
+                deleteBubble(bubble);
+            });
+            
+            // Eventos para pontos de conexão
+            const connectionPoints = bubble.querySelectorAll('.connection-point');
+            connectionPoints.forEach(point => {
+                point.addEventListener('mousedown', (e) => {
+                    e.stopPropagation();
+                    startConnection(bubble, point.classList[1]);
+                });
+            });
+            
+            workTable.appendChild(bubble);
+            bubbles.push(bubble);
+            
+            return bubble;
+        }
+
+        // Função para selecionar bolha
+        function selectBubble(e) {
+            if (selectedBubble) {
+                selectedBubble.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+            }
+            
+            selectedBubble = e.currentTarget;
+            selectedBubble.style.boxShadow = '0 0 0 2px #8a2be2';
+            
+            // Preencher editor com conteúdo da bolha
+            const contentElement = selectedBubble.querySelector('.bubble-content');
+            if (contentElement.querySelector('img')) {
+                // Se for uma imagem, não preencher o editor de texto
+                editorArea.value = '[Imagem]';
+            } else {
+                editorArea.value = contentElement.textContent;
+            }
+        }
+
+        // Funções para arrastar bolhas
+        function startDrag(e) {
+            if (e.button !== 0) return; // Apenas botão esquerdo
+            
+            isDragging = true;
+            const bubble = e.currentTarget;
+            const rect = bubble.getBoundingClientRect();
+            const tableRect = workTable.getBoundingClientRect();
+            
+            dragOffset.x = e.clientX - rect.left;
+            dragOffset.y = e.clientY - rect.top;
+            
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', stopDrag);
+            
+            e.preventDefault();
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+            
+            const bubble = selectedBubble || document.elementFromPoint(e.clientX, e.clientY).closest('.bubble');
+            if (!bubble) return;
+            
+            const tableRect = workTable.getBoundingClientRect();
+            const x = e.clientX - tableRect.left - dragOffset.x;
+            const y = e.clientY - tableRect.top - dragOffset.y;
+            
+            bubble.style.left = `${Math.max(0, x)}px`;
+            bubble.style.top = `${Math.max(0, y)}px`;
+        }
+
+        function stopDrag() {
+            isDragging = false;
+            document.removeEventListener('mousemove', drag);
+            document.removeEventListener('mouseup', stopDrag);
+        }
+
+        // Função para duplicar bolha
+        function duplicateBubble(bubble) {
+            const type = bubble.getAttribute('data-type');
+            const title = bubble.querySelector('.bubble-header span').textContent;
+            const content = bubble.querySelector('.bubble-content').innerHTML;
+            
+            const newBubble = createBubble(type, title);
+            newBubble.querySelector('.bubble-content').innerHTML = content;
+            
+            // Posicionar próximo à bolha original
+            const rect = bubble.getBoundingClientRect();
+            const tableRect = workTable.getBoundingClientRect();
+            
+            newBubble.style.left = `${rect.left - tableRect.left + 20}px`;
+            newBubble.style.top = `${rect.top - tableRect.top + 20}px`;
+        }
+
+        // Função para excluir bolha
+        function deleteBubble(bubble) {
+            if (confirm('Tem certeza que deseja excluir esta bolha?')) {
+                bubble.remove();
+                bubbles = bubbles.filter(b => b !== bubble);
+                
+                if (selectedBubble === bubble) {
+                    selectedBubble = null;
+                    editorArea.value = '';
+                }
+            }
+        }
+
+        // Funções para conectar bolhas
+        function startConnection(bubble, direction) {
+            isConnecting = true;
+            connectionStart = { bubble, direction };
+            
+            document.addEventListener('mousemove', drawConnection);
+            document.addEventListener('click', finishConnection);
+            
+            // Mudar cursor para indicar modo de conexão
+            document.body.style.cursor = 'crosshair';
+        }
+
+        function drawConnection(e) {
+            if (!isConnecting) return;
+            
+            // Limpar linhas de conexão existentes
+            const existingLines = document.querySelectorAll('.connection-line-temp');
+            existingLines.forEach(line => line.remove());
+            
+            // Calcular ponto de início
+            const startRect = connectionStart.bubble.getBoundingClientRect();
+            const tableRect = workTable.getBoundingClientRect();
+            
+            let startX, startY;
+            
+            switch (connectionStart.direction) {
+                case 'top':
+                    startX = startRect.left + startRect.width / 2 - tableRect.left;
+                    startY = startRect.top - tableRect.top;
+                    break;
+                case 'bottom':
+                    startX = startRect.left + startRect.width / 2 - tableRect.left;
+                    startY = startRect.bottom - tableRect.top;
+                    break;
+                case 'left':
+                    startX = startRect.left - tableRect.left;
+                    startY = startRect.top + startRect.height / 2 - tableRect.top;
+                    break;
+                case 'right':
+                    startX = startRect.right - tableRect.left;
+                    startY = startRect.top + startRect.height / 2 - tableRect.top;
+                    break;
+                default:
+                    startX = startRect.left + startRect.width / 2 - tableRect.left;
+                    startY = startRect.top + startRect.height / 2 - tableRect.top;
+            }
+            
+            // Calcular ponto final (posição do mouse)
+            const endX = e.clientX - tableRect.left;
+            const endY = e.clientY - tableRect.top;
+            
+            // Calcular distância e ângulo
+            const dx = endX - startX;
+            const dy = endY - startY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+            
+            // Criar linha temporária
+            const line = document.createElement('div');
+            line.className = 'connection-line connection-line-temp';
+            line.style.left = `${startX}px`;
+            line.style.top = `${startY}px`;
+            line.style.width = `${distance}px`;
+            line.style.transform = `rotate(${angle}deg)`;
+            
+            workTable.appendChild(line);
+        }
+
+        function finishConnection(e) {
+            if (!isConnecting) return;
+            
+            isConnecting = false;
+            document.removeEventListener('mousemove', drawConnection);
+            document.removeEventListener('click', finishConnection);
+            
+            // Restaurar cursor
+            document.body.style.cursor = 'default';
+            
+            // Remover linha temporária
+            const tempLines = document.querySelectorAll('.connection-line-temp');
+            tempLines.forEach(line => line.remove());
+            
+            // Verificar se o clique foi em uma bolha
+            const targetBubble = e.target.closest('.bubble');
+            if (targetBubble && targetBubble !== connectionStart.bubble) {
+                // Criar conexão permanente
+                createPermanentConnection(connectionStart.bubble, targetBubble);
+            }
+        }
+
+        function createPermanentConnection(bubble1, bubble2) {
+            // Calcular pontos de conexão
+            const rect1 = bubble1.getBoundingClientRect();
+            const rect2 = bubble2.getBoundingClientRect();
+            const tableRect = workTable.getBoundingClientRect();
+            
+            const startX = rect1.left + rect1.width / 2 - tableRect.left;
+            const startY = rect1.top + rect1.height / 2 - tableRect.top;
+            
+            const endX = rect2.left + rect2.width / 2 - tableRect.left;
+            const endY = rect2.top + rect2.height / 2 - tableRect.top;
+            
+            // Calcular distância e ângulo
+            const dx = endX - startX;
+            const dy = endY - startY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+            
+            // Criar linha permanente
+            const line = document.createElement('div');
+            line.className = 'connection-line';
+            line.style.left = `${startX}px`;
+            line.style.top = `${startY}px`;
+            line.style.width = `${distance}px`;
+            line.style.transform = `rotate(${angle}deg)`;
+            
+            workTable.appendChild(line);
+            
+            alert(`Bolhas "${bubble1.querySelector('.bubble-header span').textContent}" e "${bubble2.querySelector('.bubble-header span').textContent}" conectadas!`);
+        }
+
+        // Atalhos de teclado
+        document.addEventListener('keydown', (e) => {
+            // Ctrl+Z para desfazer
+            if (e.ctrlKey && e.key === 'z') {
+                e.preventDefault();
+                alert('Ação desfeita!');
+            }
+            
+            // Ctrl+Y para refazer
+            if (e.ctrlKey && e.key === 'y') {
+                e.preventDefault();
+                alert('Ação refeita!');
+            }
+            
+            // Enter para SaveRote
+            if (e.key === 'Enter' && !e.ctrlKey && !e.altKey && !e.shiftKey) {
+                // Verificar se não está em um campo de entrada
+                if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+                    e.preventDefault();
+                    showSaveRoteOptions();
+                    showShortcutHint('Enter: SaveRote');
+                }
+            }
+            
+            // Delete para apagar bolha selecionada
+            if (e.key === 'Delete' && selectedBubble) {
+                deleteBubble(selectedBubble);
+            }
+            
+            // ESC para fechar modais
+            if (e.key === 'Escape') {
+                if (loginModal.style.display === 'flex') {
+                    loginModal.style.display = 'none';
+                }
+                if (profileSystem.style.display === 'block') {
+                    profileSystem.style.display = 'none';
+                }
+                if (flowsocial.style.display === 'block') {
+                    flowsocial.style.display = 'none';
+                }
+                if (preview.style.display === 'block') {
+                    preview.style.display = 'none';
+                }
+                if (settings.style.display === 'block') {
+                    settings.style.display = 'none';
+                }
+                if (searchBubbles.style.display === 'block') {
+                    searchBubbles.style.display = 'none';
+                }
+                if (newStory.style.display === 'block') {
+                    newStory.style.display = 'none';
+                }
+                if (invite.style.display === 'block') {
+                    invite.style.display = 'none';
+                }
+                if (uploadSystem.style.display === 'block') {
+                    uploadSystem.style.display = 'none';
+                }
+            }
+        });
+
+        // Função para mostrar dica de atalho
+        function showShortcutHint(message) {
+            shortcutHint.textContent = message;
+            shortcutHint.classList.add('show');
+            
+            setTimeout(() => {
+                shortcutHint.classList.remove('show');
+            }, 2000);
+        }
+
+        // Simular salvamento automático a cada 15 segundos
+        setInterval(() => {
+            console.log('Salvamento automático realizado');
+        }, 15000);
+    </script>
+</body>
+</html>
