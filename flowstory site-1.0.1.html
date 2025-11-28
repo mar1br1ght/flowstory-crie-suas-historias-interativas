@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlowStory</title>
+    <style>
+        :root {
+            --lilac: #e6e6fa;
+            --orange-pastel: #ffd8b1;
+            --yellow-pastel: #fffacd;
+            --pink-pastel: #ffd1dc;
+            --mint: #b5e7a0;
+            --light-gray: #f5f5f5;
+            --dark-gray: #333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Menu Principal */
+        .main-menu {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: white;
+            padding: 10px 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            height: 60px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #8a2be2;
+        }
+
+        .menu-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .menu-btn {
+            padding: 8px 15px;
+            border: none;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .menu-btn:hover {
+            background-color: #e0e0e0;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Área de Trabalho */
+        .workspace {
+            display: flex;
+            height: calc(100vh - 60px);
+        }
+
+        /* Painel de Abas */
+        .tab-panel {
+            width: 200px;
+            background-color: white;
+            padding: 10px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            overflow-y: auto;
+        }
+
+        .tab-category {
+            margin-bottom: 20px;
+        }
+
+        .tab-category h3 {
+            font-size: 14px;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .tab-item {
+            padding: 8px 10px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background-color 0.2s;
+        }
+
+        .tab-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .esqueleto { background-color: var(--lilac); }
+        .aparencia { background-color: var(--orange-pastel); }
+        .bolhas-filhas { background-color: var(--orange-pastel); }
+        .cenas-esqueleto { background-color: var(--yellow-pastel); }
+        .cenas { background-color: var(--pink-pastel); }
+        .menu-bolhas { background-color: var(--mint); }
+
+        /* Mesa de Trabalho */
+        .work-table {
+            flex: 1;
+            background-color: #f9f9f9;
+            position: relative;
+            overflow: auto;
+            padding: 20px;
+        }
+
+        .bubble {
+            position: absolute;
+            min-width: 150px;
+            min-height: 80px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 10px;
+            cursor: move;
+            user-select: none;
+        }
+
+        .bubble-header {
+            font-weight: bold;
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .bubble-content {
+            font-size: 12px;
+        }
+
+        /* Editor de Texto */
+        .text-editor {
+            width: 400px;
+            background-color: white;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-header {
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .editor-area {
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            font-family: monospace;
+            resize: none;
+            outline: none;
+        }
+
+        .editor-actions {
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .action-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .save-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .clear-btn {
+            background-color: #f44336;
+            color: white;
+        }
+
+        /* Modal de Login */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 400px;
+            max-width: 90%;
+        }
+
+        .modal-header {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        /* Sistema de Perfis */
+        .profile-system {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            z-index: 900;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .profile-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+        }
+
+        .profile-sidebar {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .profile-main {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- Menu Principal -->
+    <div class="main-menu">
+        <div class="logo">FlowStory</div>
+        <div class="menu-buttons">
+            <button class="menu-btn" id="new-story">Nova História Interativa</button>
+            <button class="menu-btn" id="new-webseries">Nova Websérie</button>
+            <button class="menu-btn" id="settings">Configuração</button>
+            <button class="menu-btn" id="login-btn">Login</button>
+            <button class="menu-btn" id="invite-btn">Convite-se</button>
+            <button class="menu-btn" id="search-bubbles">Pesquisar Bolhas</button>
+            <button class="menu-btn" id="preview-btn">Preview</button>
+        </div>
+        <div class="user-actions">
+            <button class="menu-btn" id="save-point">SavePoint</button>
+            <button class="menu-btn" id="save-rote">SaveRote</button>
+            <button class="menu-btn" id="save-scene">SaveScene</button>
+        </div>
+    </div>
+
+    <!-- Área de Trabalho -->
+    <div class="workspace">
+        <!-- Painel de Abas -->
+        <div class="tab-panel">
+            <div class="tab-category">
+                <h3>Esqueleto da História</h3>
+                <div class="tab-item esqueleto" data-type="se">Se</div>
+                <div class="tab-item esqueleto" data-type="contexto">Contexto</div>
+                <div class="tab-item esqueleto" data-type="entao">Então</div>
+                <div class="tab-item esqueleto" data-type="senao">Senão</div>
+            </div>
+            
+            <div class="tab-category">
+                <h3>Aparência</h3>
+                <div class="tab-item aparencia" data-type="mover-personagem">Mover Personagem</div>
+                <div class="tab-item aparencia" data-type="mudar-foco">Mudar Foco</div>
+                <div class="tab-item aparencia" data-type="cenario">Cenário</div>
+                <div class="tab-item aparencia" data-type="esconder-personagem">Esconder Personagem</div>
+                <div class="tab-item aparencia" data-type="sair-tela">Sair da Tela</div>
+                <div class="tab-item aparencia" data-type="desaparecer">Desaparecer</div>
+            </div>
+            
+            <div class="tab-category">
+                <h3>Bolhas Filhas</h3>
+                <div class="tab-item bolhas-filhas" data-type="personagem">Personagem()</div>
+                <div class="tab-item bolhas-filhas" data-type="cenario">Cenário()</div>
+                <div class="tab-item bolhas-filhas" data-type="mudar-expressao">Mudar Expressão</div>
+                <div class="tab-item bolhas-filhas" data-type="trazer-personagem">Trazer Personagem</div>
+                <div class="tab-item bolhas-filhas" data-type="esquerda">Esquerda</div>
+                <div class="tab-item bolhas-filhas" data-type="direita">Direita</div>
+                <div class="tab-item bolhas-filhas" data-type="centro">Centro</div>
+                <div class="tab-item bolhas-filhas" data-type="canto-sup-dir">Canto Sup. Dir</div>
+                <div class="tab-item bolhas-filhas" data-type="canto-sup-esq">Canto Sup. Esq</div>
+                <div class="tab-item bolhas-filhas" data-type="canto-inf-dir">Canto Inf. Dir</div>
+                <div class="tab-item bolhas-filhas" data-type="canto-inf-esq">Canto Inf. Esq</div>
+            </div>
+            
+            <div class="tab-category">
+                <h3>Cenas Esqueleto</h3>
+                <div class="tab-item cenas-esqueleto" data-type="novo-capitulo">Novo Capítulo</div>
+                <div class="tab-item cenas-esqueleto" data-type="criar-rota">Criar Rota</div>
+                <div class="tab-item cenas-esqueleto" data-type="dialogo">Diálogo</div>
+            </div>
+            
+            <div class="tab-category">
+                <h3>Cenas</h3>
+                <div class="tab-item cenas" data-type="tempo-slide">Tempo de Slide</div>
+                <div class="tab-item cenas" data-type="transicao-subita">Transição Súbita</div>
+                <div class="tab-item cenas" data-type="mudar-expressao">Mudar Expressão</div>
+                <div class="tab-item cenas" data-type="cena">Cena</div>
+            </div>
+            
+            <div class="tab-category">
+                <h3>Fim</h3>
+                <div class="tab-item" data-type="parar-tudo">Parar Tudo</div>
+            </div>
+            
+            <div class="tab-category">
+                <h3>Menu Bolhas</h3>
+                <div class="tab-item menu-bolhas" data-type="onde-parei">Onde Parei</div>
+                <div class="tab-item menu-bolhas" data-type="savepoint">SavePoint</div>
+                <div class="tab-item menu-bolhas" data-type="newpoint">NewPoint</div>
+                <div class="tab-item menu-bolhas" data-type="settar">Settar</div>
+            </div>
+        </div>
+
+        <!-- Mesa de Trabalho -->
+        <div class="work-table" id="work-table">
+            <!-- Bolhas serão adicionadas aqui dinamicamente -->
+        </div>
+
+        <!-- Editor de Texto -->
+        <div class="text-editor">
+            <div class="editor-header">Editor de Texto de Bolhas</div>
+            <textarea class="editor-area" id="editor-area" placeholder="Escreva o código da bolha aqui..."></textarea>
+            <div class="editor-actions">
+                <button class="action-btn clear-btn" id="clear-editor">Limpar</button>
+                <button class="action-btn save-btn" id="save-editor">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Login -->
+    <div class="modal" id="login-modal">
+        <div class="modal-content">
+            <div class="modal-header">Login</div>
+            <div class="form-group">
+                <label for="username">Nick ou Email:</label>
+                <input type="text" id="username">
+            </div>
+            <div class="form-group">
+                <label for="password">Senha ou Código:</label>
+                <input type="password" id="password">
+            </div>
+            <div class="modal-actions">
+                <button class="action-btn" id="cancel-login">Cancelar</button>
+                <button class="action-btn save-btn" id="confirm-login">Entrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sistema de Perfis -->
+    <div class="profile-system" id="profile-system">
+        <div class="profile-header">
+            <h2>Minha Banca</h2>
+            <button class="close-btn" id="close-profile">×</button>
+        </div>
+        <div class="profile-content">
+            <div class="profile-sidebar">
+                <h3>Menu</h3>
+                <div class="tab-item">Suas Histórias</div>
+                <div class="tab-item">Bate Papo</div>
+                <div class="tab-item">Atualizações</div>
+                <div class="tab-item">Explorar Bancas</div>
+            </div>
+            <div class="profile-main">
+                <h3>Conteúdo</h3>
+                <p>Área para exibir o conteúdo selecionado no menu lateral.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variáveis globais
+        let bubbles = [];
+        let selectedBubble = null;
+        let isDragging = false;
+        let dragOffset = { x: 0, y: 0 };
+
+        // Elementos DOM
+        const workTable = document.getElementById('work-table');
+        const editorArea = document.getElementById('editor-area');
+        const loginModal = document.getElementById('login-modal');
+        const profileSystem = document.getElementById('profile-system');
+
+        // Event Listeners para abas
+        document.querySelectorAll('.tab-item').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const type = tab.getAttribute('data-type');
+                createBubble(type, tab.textContent);
+            });
+        });
+
+        // Event Listeners para botões do menu
+        document.getElementById('login-btn').addEventListener('click', () => {
+            loginModal.style.display = 'flex';
+        });
+
+        document.getElementById('cancel-login').addEventListener('click', () => {
+            loginModal.style.display = 'none';
+        });
+
+        document.getElementById('confirm-login').addEventListener('click', () => {
+            // Simulação de login bem-sucedido
+            loginModal.style.display = 'none';
+            profileSystem.style.display = 'block';
+        });
+
+        document.getElementById('close-profile').addEventListener('click', () => {
+            profileSystem.style.display = 'none';
+        });
+
+        document.getElementById('save-point').addEventListener('click', () => {
+            alert('SavePoint realizado com sucesso!');
+        });
+
+        document.getElementById('save-rote').addEventListener('click', () => {
+            alert('Opções de exportação:\n- HTML com CSS, JavaScript, JSON\n- APK\n- EXE');
+        });
+
+        document.getElementById('save-scene').addEventListener('click', () => {
+            alert('SaveScene realizado com sucesso!');
+        });
+
+        document.getElementById('clear-editor').addEventListener('click', () => {
+            editorArea.value = '';
+        });
+
+        document.getElementById('save-editor').addEventListener('click', () => {
+            if (selectedBubble) {
+                selectedBubble.querySelector('.bubble-content').textContent = editorArea.value;
+                alert('Conteúdo da bolha salvo!');
+            } else {
+                alert('Selecione uma bolha para editar!');
+            }
+        });
+
+        // Função para criar bolhas
+        function createBubble(type, title) {
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            bubble.style.left = '100px';
+            bubble.style.top = '100px';
+            
+            bubble.innerHTML = `
+                <div class="bubble-header">${title}</div>
+                <div class="bubble-content">Conteúdo da bolha ${title}</div>
+            `;
+            
+            // Adicionar eventos de arrastar
+            bubble.addEventListener('mousedown', startDrag);
+            bubble.addEventListener('click', selectBubble);
+            bubble.addEventListener('contextmenu', showBubbleMenu);
+            
+            workTable.appendChild(bubble);
+            bubbles.push(bubble);
+            
+            return bubble;
+        }
+
+        // Função para selecionar bolha
+        function selectBubble(e) {
+            if (selectedBubble) {
+                selectedBubble.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+            }
+            
+            selectedBubble = e.currentTarget;
+            selectedBubble.style.boxShadow = '0 0 0 2px #8a2be2';
+            
+            // Preencher editor com conteúdo da bolha
+            editorArea.value = selectedBubble.querySelector('.bubble-content').textContent;
+        }
+
+        // Funções para arrastar bolhas
+        function startDrag(e) {
+            if (e.button !== 0) return; // Apenas botão esquerdo
+            
+            isDragging = true;
+            const bubble = e.currentTarget;
+            const rect = bubble.getBoundingClientRect();
+            
+            dragOffset.x = e.clientX - rect.left;
+            dragOffset.y = e.clientY - rect.top;
+            
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', stopDrag);
+            
+            e.preventDefault();
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+            
+            const bubble = selectedBubble || document.elementFromPoint(e.clientX, e.clientY).closest('.bubble');
+            if (!bubble) return;
+            
+            const tableRect = workTable.getBoundingClientRect();
+            const x = e.clientX - tableRect.left - dragOffset.x;
+            const y = e.clientY - tableRect.top - dragOffset.y;
+            
+            bubble.style.left = `${Math.max(0, x)}px`;
+            bubble.style.top = `${Math.max(0, y)}px`;
+        }
+
+        function stopDrag() {
+            isDragging = false;
+            document.removeEventListener('mousemove', drag);
+            document.removeEventListener('mouseup', stopDrag);
+        }
+
+        // Função para mostrar menu de contexto da bolha
+        function showBubbleMenu(e) {
+            e.preventDefault();
+            
+            // Criar menu de contexto
+            const contextMenu = document.createElement('div');
+            contextMenu.style.position = 'absolute';
+            contextMenu.style.left = `${e.clientX}px`;
+            contextMenu.style.top = `${e.clientY}px`;
+            contextMenu.style.backgroundColor = 'white';
+            contextMenu.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+            contextMenu.style.borderRadius = '5px';
+            contextMenu.style.padding = '5px 0';
+            contextMenu.style.zIndex = '1000';
+            
+            contextMenu.innerHTML = `
+                <div class="context-item" style="padding: 8px 15px; cursor: pointer;">Copiar</div>
+                <div class="context-item" style="padding: 8px 15px; cursor: pointer;">Colar</div>
+                <div class="context-item" style="padding: 8px 15px; cursor: pointer; color: red;">Excluir</div>
+            `;
+            
+            document.body.appendChild(contextMenu);
+            
+            // Adicionar eventos aos itens do menu
+            contextMenu.querySelectorAll('.context-item').forEach((item, index) => {
+                item.addEventListener('click', () => {
+                    if (index === 0) {
+                        // Copiar
+                        alert('Bolha copiada!');
+                    } else if (index === 1) {
+                        // Colar
+                        alert('Bolha colada!');
+                    } else if (index === 2) {
+                        // Excluir
+                        if (selectedBubble) {
+                            selectedBubble.remove();
+                            bubbles = bubbles.filter(b => b !== selectedBubble);
+                            selectedBubble = null;
+                            editorArea.value = '';
+                        }
+                    }
+                    document.body.removeChild(contextMenu);
+                });
+            });
+            
+            // Fechar menu ao clicar fora
+            document.addEventListener('click', function closeMenu() {
+                if (document.body.contains(contextMenu)) {
+                    document.body.removeChild(contextMenu);
+                }
+                document.removeEventListener('click', closeMenu);
+            });
+        }
+
+        // Atalhos de teclado
+        document.addEventListener('keydown', (e) => {
+            // Ctrl+Z para desfazer
+            if (e.ctrlKey && e.key === 'z') {
+                e.preventDefault();
+                alert('Ação desfeita!');
+            }
+            
+            // Ctrl+Y para refazer
+            if (e.ctrlKey && e.key === 'y') {
+                e.preventDefault();
+                alert('Ação refeita!');
+            }
+            
+            // R para SaveRote
+            if (e.key === 'r') {
+                e.preventDefault();
+                document.getElementById('save-rote').click();
+            }
+            
+            // Delete para apagar bolha selecionada
+            if (e.key === 'Delete' && selectedBubble) {
+                selectedBubble.remove();
+                bubbles = bubbles.filter(b => b !== selectedBubble);
+                selectedBubble = null;
+                editorArea.value = '';
+            }
+            
+            // ESC para fechar modais
+            if (e.key === 'Escape') {
+                if (loginModal.style.display === 'flex') {
+                    loginModal.style.display = 'none';
+                }
+                if (profileSystem.style.display === 'block') {
+                    profileSystem.style.display = 'none';
+                }
+            }
+        });
+
+        // Simular salvamento automático a cada 15 segundos
+        setInterval(() => {
+            console.log('Salvamento automático realizado');
+        }, 15000);
+    </script>
+</body>
+</html>
